@@ -297,7 +297,6 @@ def distorted_inputs(data_dir, batch_size):
 
     height = IMAGE_SIZE
     width = IMAGE_SIZE
-    print('-------------1')
 
     # Image processing for training the network. Note the many random
     # distortions applied to the image.
@@ -307,7 +306,6 @@ def distorted_inputs(data_dir, batch_size):
 
     # Randomly flip the image horizontally.
     distorted_image = tf.image.random_flip_left_right(distorted_image)
-    print('-------------2')
 
     # Because these operations are not commutative, consider randomizing
     # the order their operation.
@@ -317,18 +315,14 @@ def distorted_inputs(data_dir, batch_size):
                                                  max_delta=63)
     distorted_image = tf.image.random_contrast(distorted_image,
                                                lower=0.2, upper=1.8)
-    print('-------------3')
 
     # Subtract off the mean and divide by the variance of the pixels.
     float_image = tf.image.per_image_standardization(distorted_image)
-
-    print('-------------4')
 
     # tf_config = tf.ConfigProto(operation_timeout_in_ms=6000)
     # tf_config.gpu_options.per_process_gpu_memory_fraction = 0.45
     # float_image = tf.Session(config=tf_config).run(float_image)
 
-    print('-------------5')
     # Set the shapes of tensors.
     float_image.set_shape([height, width, 3])
     print(type(read_input.label))

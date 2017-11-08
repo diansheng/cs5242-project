@@ -1,0 +1,18 @@
+# macos
+.DS_Store
+
+# pyc
+*.pyc
+
+# ipython notebook
+.ipynb_checkpoints
+
+# pycharm
+.idea/
+
+# data
+mobile_net/results/
+mobile_net/results_50/
+/test_photos/
+/tf_files/
+mobile_net/tf_files/
