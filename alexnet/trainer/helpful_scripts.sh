@@ -30,7 +30,7 @@ python cifar10_multi_gpu_train.py \
 python cifar10_eval.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
 	--eval_data teset \
-	--num_examples 200 \
+	--num_examples 200 
 
 
 # full class in gcloud
