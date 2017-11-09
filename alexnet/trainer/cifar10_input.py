@@ -277,20 +277,19 @@ def get_image_input(data_dir):
 def get_image_input2(data_dir):
   from cifar10 import FLAGS
   print('>>>> get image input start >>>>')
+  num_classes = FLAGS.num_classes
   
   label_file = os.path.join(data_dir, '../train.csv')
   df = pd.read_csv(label_file, header=0, index_col=False)
+  df = df[:num_classes]  # if you only want to pick a few classes to train
   df['file_full_path'] = df.apply(lambda row: os.path.join(data_dir, row['image_name']),axis=1)
   filenames = df['file_full_path'].tolist()
   labels = df['category'].astype(int).tolist()
 
-  filenames = filenames[:FLAGS.num_classes]
-  labels = labels[:FLAGS.num_classes]
-
-  print(len(filenames))
-  print(len(labels))
-  print(filenames[:30])
-  print(labels[:30])
+  # print(len(filenames))
+  # print(len(labels))
+  # print(filenames[:30])
+  # print(labels[:30])
 
   for f in filenames:
       if not tf.gfile.Exists(f):
@@ -391,31 +390,11 @@ def inputs(eval_data, data_dir, batch_size):
       # filenames = [os.path.join(data_dir, 'test_batch.bin')]
       num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
-    label_file = os.path.join(data_dir, '../train.csv')
-    df = pd.read_csv(label_file, header=0)
-    filenames = df.apply(lambda row: os.path.join(data_dir, row['image_name'])).tolist()
-    labels = df['category'].astype(int).tolist()
-
-    print(len(filenames))
-    print(len(labels))
-    print(filenames[:30])
-    print(labels[:30])
-
-    for f in filenames:
-        if not tf.gfile.Exists(f):
-            raise ValueError('Failed to find file: ' + f)
-
-    # Create a queue that produces the filenames to read.
-
-
-    eval_input_queue = tf.train.slice_input_producer(
-                                    [filenames, labels],
-                                    shuffle=False)
-    read_input = read_image(eval_input_queue)
+    read_input = get_image_input2(data_dir)
 
     # Read examples from files in the filename queue.
     # read_input = read_cifar10(filename_queue)
-    reshaped_image = tf.cast(read_input.uint8image, tf.float32)
+    reshaped_image = tf.cast(read_input.image, tf.float32)
 
     height = IMAGE_SIZE
     width = IMAGE_SIZE

@@ -46,20 +46,20 @@ import cifar10
 
 parser = cifar10.parser
 
-parser.add_argument('--train_dir', type=str, default='/tmp/cifar10_train',
-                    help='Directory where to write event logs and checkpoint.')
-
-# parser.add_argument('--data_dir', type=str, default='/Users/diansheng/Codebox/tensorflow_env/cs5242/data/train_partial',
+# parser.add_argument('--train_dir', type=str, default='/tmp/cifar10_train',
 #                     help='Directory where to write event logs and checkpoint.')
 
-parser.add_argument('--max_steps', type=int, default=1000, # origin: default=1000000,
-                    help='Number of batches to run.')
+# # parser.add_argument('--data_dir', type=str, default='/Users/diansheng/Codebox/tensorflow_env/cs5242/data/train_partial',
+# #                     help='Directory where to write event logs and checkpoint.')
 
-parser.add_argument('--log_device_placement', type=bool, default=False,
-                    help='Whether to log device placement.')
+# parser.add_argument('--max_steps', type=int, default=1000, # origin: default=1000000,
+#                     help='Number of batches to run.')
 
-parser.add_argument('--log_frequency', type=int, default=10,
-                    help='How often to log results to the console.')
+# parser.add_argument('--log_device_placement', type=bool, default=False,
+#                     help='Whether to log device placement.')
+
+# parser.add_argument('--log_frequency', type=int, default=10,
+#                     help='How often to log results to the console.')
 
 
 def train():

@@ -32,8 +32,12 @@ python cifar10_eval.py \
 	--num_examples 200 \
 
 
-python cifar10_train.py --data_dir ~/data/train_full --num_class 132 --initial_learn_rate 0.1 --batch_size 50 
+# full class in gcloud
+python cifar10_train.py --data_dir ~/data/transferred_train --num_class 132 --initial_learn_rate 0.1 --batch_size 50 
 
+python cifar10_train.py --data_dir ~/data/transferred_train --num_class 6 --initial_learn_rate 0.1 --batch_size 50 --max_steps 10000
+
+nohup python cifar10_train.py --data_dir ~/data/transferred_train --num_class 132 --initial_learn_rate 0.1 --batch_size 50 > nohup.log &
 
 """
 loss improve log
