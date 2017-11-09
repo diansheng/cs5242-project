@@ -30,7 +30,8 @@ from tensorflow.python.util import compat
 # Process images of this size. Note that this differs from the original CIFAR
 # image size of 32 x 32. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
-IMAGE_SIZE = 24
+BEFORE_DISTORT_SIZE = 144
+IMAGE_SIZE = 98  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
 NUM_CLASSES = 2 # origin: 10
@@ -233,7 +234,7 @@ def read_image(input_queue):
     pass 
   res = ImageRecord()
   img = tf.image.decode_jpeg(tf.read_file(input_queue[0]))
-  res.image = tf.image.resize_image_with_crop_or_pad(img, 32, 32)
+  res.image = tf.image.resize_image_with_crop_or_pad(img, BEFORE_DISTORT_SIZE, BEFORE_DISTORT_SIZE)
   # res.image = tf.image.resize_image_with_crop_or_pad(img, 144, 144)
   res.label = tf.cast(input_queue[1], tf.int32)
   print('<<<< read image <<<<')

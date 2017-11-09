@@ -58,11 +58,17 @@ parser.add_argument('--data_dir', type=str, default='/tmp/cifar10_data',
 parser.add_argument('--use_fp16', type=bool, default=False,
                     help='Train the model using fp16.')
 
+parser.add_argument('--initial_learn_rate', type=float, default=0.1,
+                    help='Train the model using fp16.')
+
+parser.add_argument('--num_classes', type=int, default=2,
+                    help='.')
+
 FLAGS = parser.parse_args()
 
 # Global constants describing the CIFAR-10 data set.
 IMAGE_SIZE = cifar10_input.IMAGE_SIZE
-NUM_CLASSES = cifar10_input.NUM_CLASSES
+NUM_CLASSES = FLAGS.num_classes # origin: cifar10_input.NUM_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -71,7 +77,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
 NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
-INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
+INITIAL_LEARNING_RATE = FLAGS.initial_learn_rate # origin: 0.1      # Initial learning rate.
 
 # If a model is trained with multiple GPUs, prefix all Op names with tower_name
 # to differentiate the operations. Note that this prefix is removed from the
@@ -204,13 +210,34 @@ def inference(images):
   # If we only ran this model on a single GPU, we could simplify this function
   # by replacing all instances of tf.get_variable() with tf.Variable().
   #
+
+  # conv0
+  with tf.variable_scope('conv0') as scope:
+    kernel = _variable_with_weight_decay('weights',
+                                         shape=[6, 6, 3, 16],
+                                         stddev=5e-2,
+                                         wd=0.0)
+    conv = tf.nn.conv2d(images, kernel, [1, 5, 5, 1], padding='VALID')
+    biases = _variable_on_cpu('biases', [16], tf.constant_initializer(0.0))
+    pre_activation = tf.nn.bias_add(conv, biases)
+    conv0 = tf.nn.relu(pre_activation, name=scope.name)
+    _activation_summary(conv0)
+
+  # pool0
+  pool0 = conv0
+  # pool0 = tf.nn.max_pool(conv0, ksize=[1, 6, 6, 1], strides=[1, 5, 5, 1],
+  #                        padding='VALID', name='pool1')
+  # norm0
+  norm0 = tf.nn.lrn(pool0, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,
+                    name='norm1')
+
   # conv1
   with tf.variable_scope('conv1') as scope:
     kernel = _variable_with_weight_decay('weights',
-                                         shape=[5, 5, 3, 64],
+                                         shape=[5, 5, 16, 64],
                                          stddev=5e-2,
                                          wd=0.0)
-    conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
+    conv = tf.nn.conv2d(norm0, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
     pre_activation = tf.nn.bias_add(conv, biases)
     conv1 = tf.nn.relu(pre_activation, name=scope.name)
