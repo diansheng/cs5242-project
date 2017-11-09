@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import os, re, hashlib
 import numpy as np
+import pandas as pd
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
@@ -34,7 +35,7 @@ BEFORE_DISTORT_SIZE = 144
 IMAGE_SIZE = 98  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
-NUM_CLASSES = 2 # origin: 10
+# NUM_CLASSES = 2 # origin: 10
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50 # origin: 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
@@ -274,9 +275,34 @@ def get_image_input(data_dir):
 
 
 def get_image_input2(data_dir):
+  from cifar10 import FLAGS
   print('>>>> get image input start >>>>')
   
-  
+  label_file = os.path.join(data_dir, '../train.csv')
+  df = pd.read_csv(label_file, header=0, index_col=False)
+  df['file_full_path'] = df.apply(lambda row: os.path.join(data_dir, row['image_name']),axis=1)
+  filenames = df['file_full_path'].tolist()
+  labels = df['category'].astype(int).tolist()
+
+  filenames = filenames[:FLAGS.num_classes]
+  labels = labels[:FLAGS.num_classes]
+
+  print(len(filenames))
+  print(len(labels))
+  print(filenames[:30])
+  print(labels[:30])
+
+  for f in filenames:
+      if not tf.gfile.Exists(f):
+          raise ValueError('Failed to find file: ' + f)
+
+  # Create a queue that produces the filenames to read.
+  eval_input_queue = tf.train.slice_input_producer(
+                                  [filenames, labels],
+                                  shuffle=False)
+  read_input = read_image(eval_input_queue)
+  return read_input
+
   print('<<<< get image input end <<<<')
 
 
@@ -292,8 +318,8 @@ def distorted_inputs(data_dir, batch_size):
       labels: Labels. 1D tensor of [batch_size] size.
     """
     # origin: read_input = get_cifar_input(data_dir)
-    read_input = get_image_input(data_dir)
-
+    # read_input = get_image_input(data_dir)
+    read_input = get_image_input2(data_dir)
     # reshaped_image = tf.cast(read_input.uint8image, tf.float32)
     reshaped_image = tf.cast(read_input.image, tf.float32)
 
@@ -358,22 +384,37 @@ def inputs(eval_data, data_dir, batch_size):
       labels: Labels. 1D tensor of [batch_size] size.
     """
     if not eval_data:
-        filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i)
-                     for i in xrange(1, 6)]
-        num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
+      # filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i)
+      #                for i in xrange(1, 6)]
+      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
     else:
-        filenames = [os.path.join(data_dir, 'test_batch.bin')]
-        num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+      # filenames = [os.path.join(data_dir, 'test_batch.bin')]
+      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+
+    label_file = os.path.join(data_dir, '../train.csv')
+    df = pd.read_csv(label_file, header=0)
+    filenames = df.apply(lambda row: os.path.join(data_dir, row['image_name'])).tolist()
+    labels = df['category'].astype(int).tolist()
+
+    print(len(filenames))
+    print(len(labels))
+    print(filenames[:30])
+    print(labels[:30])
 
     for f in filenames:
         if not tf.gfile.Exists(f):
             raise ValueError('Failed to find file: ' + f)
 
     # Create a queue that produces the filenames to read.
-    filename_queue = tf.train.string_input_producer(filenames)
+
+
+    eval_input_queue = tf.train.slice_input_producer(
+                                    [filenames, labels],
+                                    shuffle=False)
+    read_input = read_image(eval_input_queue)
 
     # Read examples from files in the filename queue.
-    read_input = read_cifar10(filename_queue)
+    # read_input = read_cifar10(filename_queue)
     reshaped_image = tf.cast(read_input.uint8image, tf.float32)
 
     height = IMAGE_SIZE

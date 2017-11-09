@@ -45,23 +45,23 @@ import cifar10
 
 parser = cifar10.parser
 
-parser.add_argument('--eval_dir', type=str, default='/tmp/cifar10_eval',
-                    help='Directory where to write event logs.')
+# parser.add_argument('--eval_dir', type=str, default='/tmp/cifar10_eval',
+#                     help='Directory where to write event logs.')
 
-parser.add_argument('--eval_data', type=str, default='test',
-                    help='Either `test` or `train_eval`.')
+# parser.add_argument('--eval_data', type=str, default='test',
+#                     help='Either `test` or `train_eval`.')
 
-parser.add_argument('--checkpoint_dir', type=str, default='/tmp/cifar10_train',
-                    help='Directory where to read model checkpoints.')
+# parser.add_argument('--checkpoint_dir', type=str, default='/tmp/cifar10_train',
+#                     help='Directory where to read model checkpoints.')
 
-parser.add_argument('--eval_interval_secs', type=int, default=60*5,
-                    help='How often to run the eval.')
+# parser.add_argument('--eval_interval_secs', type=int, default=60*5,
+#                     help='How often to run the eval.')
 
-parser.add_argument('--num_examples', type=int, default=10000,
-                    help='Number of examples to run.')
+# parser.add_argument('--num_examples', type=int, default=10000,
+#                     help='Number of examples to run.')
 
-parser.add_argument('--run_once', type=bool, default=False,
-                    help='Whether to run eval only once.')
+# parser.add_argument('--run_once', type=bool, default=False,
+#                     help='Whether to run eval only once.')
 
 
 def eval_once(saver, summary_writer, top_k_op, summary_op):
@@ -151,7 +151,7 @@ def evaluate():
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-  cifar10.maybe_download_and_extract()
+  # cifar10.maybe_download_and_extract()
   if tf.gfile.Exists(FLAGS.eval_dir):
     tf.gfile.DeleteRecursively(FLAGS.eval_dir)
   tf.gfile.MakeDirs(FLAGS.eval_dir)

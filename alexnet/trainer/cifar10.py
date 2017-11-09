@@ -64,11 +64,32 @@ parser.add_argument('--initial_learn_rate', type=float, default=0.1,
 parser.add_argument('--num_classes', type=int, default=2,
                     help='.')
 
+### copy from eval
+
+parser.add_argument('--eval_dir', type=str, default='/tmp/cifar10_eval',
+                    help='Directory where to write event logs.')
+
+parser.add_argument('--eval_data', type=str, default='test',
+                    help='Either `test` or `train_eval`.')
+
+parser.add_argument('--checkpoint_dir', type=str, default='/tmp/cifar10_train',
+                    help='Directory where to read model checkpoints.')
+
+parser.add_argument('--eval_interval_secs', type=int, default=60*5,
+                    help='How often to run the eval.')
+
+parser.add_argument('--num_examples', type=int, default=10000,
+                    help='Number of examples to run.')
+
+parser.add_argument('--run_once', type=bool, default=False,
+                    help='Whether to run eval only once.')
+
+
 FLAGS = parser.parse_args()
 
 # Global constants describing the CIFAR-10 data set.
 IMAGE_SIZE = cifar10_input.IMAGE_SIZE
-NUM_CLASSES = FLAGS.num_classes # origin: cifar10_input.NUM_CLASSES
+# NUM_CLASSES = FLAGS.num_classes # origin: cifar10_input.NUM_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -77,7 +98,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
 NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
-INITIAL_LEARNING_RATE = FLAGS.initial_learn_rate # origin: 0.1      # Initial learning rate.
+# INITIAL_LEARNING_RATE = FLAGS.initial_learn_rate # origin: 0.1      # Initial learning rate.
 
 # If a model is trained with multiple GPUs, prefix all Op names with tower_name
 # to differentiate the operations. Note that this prefix is removed from the
@@ -293,9 +314,9 @@ def inference(images):
   # tf.nn.sparse_softmax_cross_entropy_with_logits accepts the unscaled logits
   # and performs the softmax internally for efficiency.
   with tf.variable_scope('softmax_linear') as scope:
-    weights = _variable_with_weight_decay('weights', [192, NUM_CLASSES],
+    weights = _variable_with_weight_decay('weights', [192, FLAGS.num_classes],
                                           stddev=1/192.0, wd=0.0)
-    biases = _variable_on_cpu('biases', [NUM_CLASSES],
+    biases = _variable_on_cpu('biases', [FLAGS.num_classes],
                               tf.constant_initializer(0.0))
     softmax_linear = tf.add(tf.matmul(local4, weights), biases, name=scope.name)
     _activation_summary(softmax_linear)
@@ -372,7 +393,7 @@ def train(total_loss, global_step):
   decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
 
   # Decay the learning rate exponentially based on the number of steps.
-  lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
+  lr = tf.train.exponential_decay(FLAGS.initial_learn_rate,
                                   global_step,
                                   decay_steps,
                                   LEARNING_RATE_DECAY_FACTOR,
