@@ -14,4 +14,5 @@ python cifar10_train.py \
 python cifar10_train.py \
 	--data_dir ~/data/train_partial \
 	--num_class 6 \
-	--initial_learn_rate 0.1 
+	--initial_learn_rate 0.1 \
+	--max_steps 10000
