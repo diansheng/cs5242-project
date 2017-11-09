@@ -101,6 +101,10 @@ parser.add_argument('--log_device_placement', type=bool, default=False,
 parser.add_argument('--log_frequency', type=int, default=10,
                     help='How often to log results to the console.')
 
+### copy from cpu with 
+
+parser.add_argument('--num_gpus', type=int, default=1,
+                    help='How many GPUs to use.')
 
 FLAGS = parser.parse_args()
 
@@ -113,8 +117,8 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
-NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
-LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
+NUM_EPOCHS_PER_DECAY = 3000.0      # Epochs after which learning rate decays.
+LEARNING_RATE_DECAY_FACTOR = 0.9  # Learning rate decay factor.
 # INITIAL_LEARNING_RATE = FLAGS.initial_learn_rate # origin: 0.1      # Initial learning rate.
 
 # If a model is trained with multiple GPUs, prefix all Op names with tower_name
@@ -224,9 +228,9 @@ def inputs(eval_data):
   """
   if not FLAGS.data_dir:
     raise ValueError('Please supply a data_dir')
-  data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
+  # origin: data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
   images, labels = cifar10_input.inputs(eval_data=eval_data,
-                                        data_dir=data_dir,
+                                        data_dir=FLAGS.data_dir,
                                         batch_size=FLAGS.batch_size)
   if FLAGS.use_fp16:
     images = tf.cast(images, tf.float16)

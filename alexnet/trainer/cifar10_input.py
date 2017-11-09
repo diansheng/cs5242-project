@@ -281,15 +281,18 @@ def get_image_input2(data_dir):
   
   label_file = os.path.join(data_dir, '../train.csv')
   df = pd.read_csv(label_file, header=0, index_col=False)
-  df = df[:num_classes]  # if you only want to pick a few classes to train
+  df['category'] = df['category'].astype(int)
+
+  df = df[ df['category'] < num_classes ]
+  # df = df[:num_classes]  # if you only want to pick a few classes to train
   df['file_full_path'] = df.apply(lambda row: os.path.join(data_dir, row['image_name']),axis=1)
   filenames = df['file_full_path'].tolist()
   labels = df['category'].astype(int).tolist()
 
-  # print(len(filenames))
-  # print(len(labels))
-  # print(filenames[:30])
-  # print(labels[:30])
+  print(len(filenames))
+  print(len(labels))
+  print(filenames[:30])
+  print(labels[:30])
 
   for f in filenames:
       if not tf.gfile.Exists(f):
@@ -352,10 +355,7 @@ def distorted_inputs(data_dir, batch_size):
 
     # Set the shapes of tensors.
     float_image.set_shape([height, width, 3])
-    print(type(read_input.label))
-    print(read_input.label.get_shape())
-    print(tf.shape(read_input.label))
-    # read_input.label.set_shape([1])
+    # origin: read_input.label.set_shape([1])
 
     # Ensure that the random shuffling has good mixing properties.
     min_fraction_of_examples_in_queue = 0.4
@@ -409,7 +409,7 @@ def inputs(eval_data, data_dir, batch_size):
 
     # Set the shapes of tensors.
     float_image.set_shape([height, width, 3])
-    read_input.label.set_shape([1])
+    # read_input.label.set_shape([1])
 
     # Ensure that the random shuffling has good mixing properties.
     min_fraction_of_examples_in_queue = 0.4

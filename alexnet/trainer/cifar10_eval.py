@@ -160,4 +160,5 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 if __name__ == '__main__':
   FLAGS = parser.parse_args()
+  print(FLAGS)
   tf.app.run()
