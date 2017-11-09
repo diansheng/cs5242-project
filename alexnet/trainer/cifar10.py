@@ -64,9 +64,6 @@ parser.add_argument('--initial_learn_rate', type=float, default=0.1,
 parser.add_argument('--num_classes', type=int, default=2,
                     help='.')
 
-parser.add_argument('--max_steps', type=int, default=1000, # origin: default=1000000,
-                    help='Number of batches to run.')
-
 FLAGS = parser.parse_args()
 
 # Global constants describing the CIFAR-10 data set.
