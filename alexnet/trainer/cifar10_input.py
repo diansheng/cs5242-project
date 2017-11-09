@@ -269,7 +269,7 @@ def get_image_input(data_dir):
 
   train_input_queue = tf.train.slice_input_producer(
                                     [train_files, train_labels],
-                                    shuffle=False)
+                                    shuffle=True)
   read_input = read_image(train_input_queue)
   return read_input
 
@@ -299,7 +299,7 @@ def get_image_input2(data_dir):
   # Create a queue that produces the filenames to read.
   eval_input_queue = tf.train.slice_input_producer(
                                   [filenames, labels],
-                                  shuffle=False)
+                                  shuffle=True)
   read_input = read_image(eval_input_queue)
   return read_input
 
