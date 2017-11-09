@@ -265,17 +265,18 @@ def get_image_input(data_dir):
     train_files += [os.path.join(label_lists['dir'], x) for x in label_lists['training']]
     train_labels += [int(label_name)] * len(label_lists['training'])
 
-  print(len(train_labels))
-  print(len(train_files))
-  print(train_files)
-  print(train_labels)
-
-  print('create queue')
   train_input_queue = tf.train.slice_input_producer(
                                     [train_files, train_labels],
                                     shuffle=False)
   read_input = read_image(train_input_queue)
   return read_input
+
+
+def get_image_input2(data_dir):
+  print('>>>> get image input start >>>>')
+  
+  
+  print('<<<< get image input end <<<<')
 
 
 def distorted_inputs(data_dir, batch_size):
