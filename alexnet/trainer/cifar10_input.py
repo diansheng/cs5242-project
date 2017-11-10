@@ -31,8 +31,8 @@ from tensorflow.python.util import compat
 # Process images of this size. Note that this differs from the original CIFAR
 # image size of 32 x 32. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
-BEFORE_DISTORT_SIZE = 144
-IMAGE_SIZE = 98  # origin: 24
+BEFORE_DISTORT_SIZE = 188
+IMAGE_SIZE = 128  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
 # NUM_CLASSES = 2 # origin: 10

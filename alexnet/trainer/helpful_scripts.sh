@@ -54,28 +54,20 @@ nohup python cifar10_train.py \
 	--max_steps 10000 \
 	> nohup.log &
 
-python cifar10_multi_gpu_train.py \
+
+nohup python cifar10_multi_gpu_train.py \
 	--data_dir ~/data/transferred_train \
 	--num_class 132 \
-	--initial_learn_rate 0.1 \
+	--initial_learn_rate 0.5 \
 	--batch_size 50 \
-	--max_steps 10000 \
-	--num_gpus 2 
-
-
-python cifar10_eval.py \
-	--data_dir ~/data/transferred_train \
-	--eval_data test \
-	--num_examples 48870 \
-	--eval_interval_secs 60 \
-	--num_class 132 \
-	--run_once true
+	--max_steps 100000 \
+	--num_gpus 2 > nohup.log &
 
 python cifar10_eval.py \
 	--data_dir ~/data/transferred_train \
-	--eval_data eval_data \
-	--num_examples 48870 \
-	--eval_interval_secs 60 \
+	--eval_data train_eval \
+	--num_examples 200 \
+	--eval_interval_secs 10 \
 	--num_class 132 \
 	--run_once true
 
@@ -87,4 +79,9 @@ loss improve log
 2 -> 1.1, batch_size 100 -> 30
 1.1 -> 0.4, num_epoch_learn_rate_decay 350 -> 1000
 0.4 -> 0.07, num_epoch_learn_rate_decay 1000 -> 3000
+
+original: 3.7
+
+
+
 """
