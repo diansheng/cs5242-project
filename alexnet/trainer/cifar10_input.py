@@ -36,8 +36,8 @@ IMAGE_SIZE = 98  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
 # NUM_CLASSES = 2 # origin: 10
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 557 # origin: 50000
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 48870 # origin: 50000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 0 # origin: 10000
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 
 
@@ -305,7 +305,7 @@ def get_image_input2(data_dir):
   # Create a queue that produces the filenames to read.
   file_input_queue = tf.train.slice_input_producer(
                                   [filenames, labels],
-                                  shuffle=False)
+                                  shuffle=True)
   read_input = read_image(file_input_queue)
   read_input.filename = file_input_queue[0]
   return read_input
@@ -389,7 +389,7 @@ def distorted_inputs(data_dir, batch_size):
     # origin: read_input.label.set_shape([1])
 
     # Ensure that the random shuffling has good mixing properties.
-    min_fraction_of_examples_in_queue = 0.4
+    min_fraction_of_examples_in_queue = 0 # origin: 0.4
     min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                              min_fraction_of_examples_in_queue)
     print('Filling queue with %d CIFAR images before starting to train. '
@@ -413,11 +413,10 @@ def inputs(eval_data, data_dir, batch_size):
       images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
       labels: Labels. 1D tensor of [batch_size] size.
     """
+    num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
     if eval_data:
-      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
       read_input = get_image_input2(data_dir)
     else:
-      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
       read_input = get_test_image_input(data_dir)
 
     # Read examples from files in the filename queue.
@@ -440,7 +439,7 @@ def inputs(eval_data, data_dir, batch_size):
     # read_input.label.set_shape([1])
 
     # Ensure that the random shuffling has good mixing properties.
-    min_fraction_of_examples_in_queue = 0.4
+    min_fraction_of_examples_in_queue = 0 # origin: 0.4
     min_queue_examples = int(num_examples_per_epoch *
                              min_fraction_of_examples_in_queue)
 

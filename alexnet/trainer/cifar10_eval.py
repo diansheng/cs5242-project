@@ -103,11 +103,8 @@ def eval_once(saver, summary_writer, top_k_op, summary_op, kwargs):
         while step < num_iter and not coord.should_stop():
           predictions, logits, predict_label, labels, filenames = sess.run(
             [top_k_op, kwargs['logits'], kwargs['predictions'], kwargs['labels'], kwargs['filenames']])
-          print('filename\tpredict_label\t real label')
+          # print('filename\tpredict_label\t real label')
           f.write('filename,\tpredict_label,\treal label,\tprobabilities\n')
-          # print(logits)
-          # print('>>>>>>>>> predictions >>>>>>>>')
-          # print(predict_label.astype(int))
           predict_label = predict_label.astype(int)
           np.savetxt(result_file, predict_label, delimiter=",",fmt='%d')
           # print('>>>>>>>>> probabilities >>>>>>>>')
@@ -115,8 +112,9 @@ def eval_once(saver, summary_writer, top_k_op, summary_op, kwargs):
           # print(probabilities)
           # np.savetext(probabilities, delimiter=",")
 
-          for i in range(len(labels)):
-            print('{}, {}, {}'.format(filenames[i].split('/')[-1],predict_label[i],labels[i]))
+          for i in range(FLAGS.batch_size):
+            print('file {}, {}'.format(step*FLAGS.batch_size+i, filenames[i].split('/')[-1]))
+            # print('{}, {}, {}'.format(filenames[i].split('/')[-1],predict_label[i],labels[i]))
             f.write('{},{},{},{}\n'.format(filenames[i].split('/')[-1], predict_label[i], labels[i], probabilities[i]))
           
           true_count += np.sum(predictions)
