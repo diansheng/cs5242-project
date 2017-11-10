@@ -23,6 +23,7 @@ python cifar10_multi_gpu_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
 	--num_class 132 \
 	--initial_learn_rate 0.1 \
+	--batch_size 32 \
 	--num_gpus 2
 
 # evaluate
@@ -66,9 +67,17 @@ nohup python cifar10_multi_gpu_train.py \
 python cifar10_eval.py \
 	--data_dir ~/data/transferred_train \
 	--eval_data train_eval \
-	--num_examples 200 \
+	--num_examples 1000 \
 	--eval_interval_secs 10 \
 	--num_class 132 \
+	--run_once true
+
+python cifar10_eval.py \
+	--data_dir ~/data/transferred_train \
+	--eval_data train_eval \
+	--num_examples 1000 \
+	--eval_interval_secs 10 \
+	--num_class 66 \
 	--run_once true
 
 
