@@ -78,7 +78,7 @@ parser.add_argument('--checkpoint_dir', type=str, default='/tmp/cifar10_train',
 parser.add_argument('--eval_interval_secs', type=int, default=60*5,
                     help='How often to run the eval.')
 
-parser.add_argument('--num_examples', type=int, default=10000,
+parser.add_argument('--num_examples', type=int, default=-1,
                     help='Number of examples to run.')
 
 parser.add_argument('--run_once', type=bool, default=False,

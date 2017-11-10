@@ -37,7 +37,7 @@ IMAGE_SIZE = 98  # origin: 24
 # Global constants describing the CIFAR-10 data set.
 # NUM_CLASSES = 2 # origin: 10
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 48870 # origin: 50000
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 0 # origin: 10000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000 # origin: 10000
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 
 
@@ -292,8 +292,13 @@ def get_image_input2(data_dir):
   df = pd.read_csv(label_file, header=0, index_col=False)
   df['category'] = df['category'].astype(int)
 
-  df = df[ df['category'] < num_classes ]
   # df = df[:num_classes]  # if you only want to pick a few classes to train
+  df = df[ df['category'] < num_classes ]
+  # shuffle data
+  df = df.sample(frac=1).reset_index(drop=True)
+  # select number of examples if only partical data is wanted
+  if FLAGS.num_examples > 0:
+    df  = df[: FLAGS.num_examples]
   df['file_full_path'] = df.apply(lambda row: os.path.join(data_dir, row['image_name']),axis=1)
   filenames = df['file_full_path'].tolist()
   labels = df['category'].astype(int).tolist()
@@ -439,7 +444,7 @@ def inputs(eval_data, data_dir, batch_size):
     # read_input.label.set_shape([1])
 
     # Ensure that the random shuffling has good mixing properties.
-    min_fraction_of_examples_in_queue = 0 # origin: 0.4
+    min_fraction_of_examples_in_queue = 0.4
     min_queue_examples = int(num_examples_per_epoch *
                              min_fraction_of_examples_in_queue)
 

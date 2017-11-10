@@ -9,17 +9,15 @@ python cifar10_train.py \
 	--num_class 2 \
 	--initial_learn_rate 0.1 \
 	--batch_size 32 \
-	--max_steps 1000 \
-	--use_fp16 True
-
+	--max_steps 1000
 
 # to run locally without training data restructure
 python cifar10_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
 	--num_class 132 \
 	--initial_learn_rate 0.1 \
-	--max_steps 1000 \
-	--use_fp16 True
+	--batch_size 30 \
+	--max_steps 100
 
 python cifar10_multi_gpu_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
@@ -45,13 +43,6 @@ python cifar10_eval.py \
 ####################################################
 
 # to run in server
-python cifar10_multi_gpu_train.py \
-	--data_dir ~/data/train_partial \
-	--num_class 2 \
-	--initial_learn_rate 0.1 \
-	--batch_size 30 \
-	--max_steps 10000 
-
 # full class in gcloud
 python cifar10_train.py --data_dir ~/data/transferred_train --num_class 132 --initial_learn_rate 0.1 --batch_size 50 
 
@@ -75,6 +66,14 @@ python cifar10_multi_gpu_train.py \
 python cifar10_eval.py \
 	--data_dir ~/data/transferred_train \
 	--eval_data test \
+	--num_examples 48870 \
+	--eval_interval_secs 60 \
+	--num_class 132 \
+	--run_once true
+
+python cifar10_eval.py \
+	--data_dir ~/data/transferred_train \
+	--eval_data eval_data \
 	--num_examples 48870 \
 	--eval_interval_secs 60 \
 	--num_class 132 \
