@@ -36,7 +36,7 @@ IMAGE_SIZE = 98  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
 # NUM_CLASSES = 2 # origin: 10
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50 # origin: 50000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 5000 # origin: 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 
@@ -105,7 +105,7 @@ def read_cifar10(filename_queue):
 
 
 def _generate_image_and_label_batch(image, label, min_queue_examples,
-                                    batch_size, shuffle):
+                                    batch_size, shuffle, filename=None):
     """Construct a queued batch of images and labels.
 
     Args:
@@ -123,24 +123,33 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
     # Create a queue that shuffles the examples, and then
     # read 'batch_size' images + labels from the example queue.
     num_preprocess_threads = 16
-    if shuffle:
-        images, label_batch = tf.train.shuffle_batch(
-            [image, label],
-            batch_size=batch_size,
-            num_threads=num_preprocess_threads,
-            capacity=min_queue_examples + 3 * batch_size,
-            min_after_dequeue=min_queue_examples)
+    if filename is not None:
+      images, label_batch, filenames = tf.train.batch(
+              [image, label, filename],
+              batch_size=batch_size,
+              num_threads=num_preprocess_threads,
+              capacity=min_queue_examples + 3 * batch_size)
+      tf.summary.image('images', images)
+      return images, tf.reshape(label_batch, [batch_size]), filenames
     else:
-        images, label_batch = tf.train.batch(
-            [image, label],
-            batch_size=batch_size,
-            num_threads=num_preprocess_threads,
-            capacity=min_queue_examples + 3 * batch_size)
+      if shuffle:
+          images, label_batch = tf.train.shuffle_batch(
+              [image, label],
+              batch_size=batch_size,
+              num_threads=num_preprocess_threads,
+              capacity=min_queue_examples + 3 * batch_size,
+              min_after_dequeue=min_queue_examples)
+      else:
+          images, label_batch = tf.train.batch(
+              [image, label],
+              batch_size=batch_size,
+              num_threads=num_preprocess_threads,
+              capacity=min_queue_examples + 3 * batch_size)
 
-    # Display the training images in the visualizer.
-    tf.summary.image('images', images)
+      # Display the training images in the visualizer.
+      tf.summary.image('images', images)
 
-    return images, tf.reshape(label_batch, [batch_size])
+      return images, tf.reshape(label_batch, [batch_size])
 
 
 def create_image_lists(image_dir, testing_percentage=0, validation_percentage=20):
@@ -289,20 +298,16 @@ def get_image_input2(data_dir):
   filenames = df['file_full_path'].tolist()
   labels = df['category'].astype(int).tolist()
 
-  print(len(filenames))
-  print(len(labels))
-  print(filenames[:30])
-  print(labels[:30])
-
   for f in filenames:
       if not tf.gfile.Exists(f):
           raise ValueError('Failed to find file: ' + f)
 
   # Create a queue that produces the filenames to read.
-  eval_input_queue = tf.train.slice_input_producer(
+  file_input_queue = tf.train.slice_input_producer(
                                   [filenames, labels],
-                                  shuffle=True)
-  read_input = read_image(eval_input_queue)
+                                  shuffle=False)
+  read_input = read_image(file_input_queue)
+  read_input.filename = file_input_queue[0]
   return read_input
 
   print('<<<< get image input end <<<<')
@@ -419,4 +424,4 @@ def inputs(eval_data, data_dir, batch_size):
     # Generate a batch of images and labels by building up a queue of examples.
     return _generate_image_and_label_batch(float_image, read_input.label,
                                            min_queue_examples, batch_size,
-                                           shuffle=False)
+                                           shuffle=False, filename = read_input.filename)

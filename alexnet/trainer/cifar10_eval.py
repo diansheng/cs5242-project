@@ -64,7 +64,7 @@ parser = cifar10.parser
 #                     help='Whether to run eval only once.')
 
 
-def eval_once(saver, summary_writer, top_k_op, summary_op):
+def eval_once(saver, summary_writer, top_k_op, summary_op, kwargs):
   """Run Eval once.
 
   Args:
@@ -98,10 +98,29 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
       true_count = 0  # Counts the number of correct predictions.
       total_sample_count = num_iter * FLAGS.batch_size
       step = 0
-      while step < num_iter and not coord.should_stop():
-        predictions = sess.run([top_k_op])
-        true_count += np.sum(predictions)
-        step += 1
+
+      with open('test.csv','wb') as result_file , open('details.csv', 'wb') as f:
+        while step < num_iter and not coord.should_stop():
+          predictions, logits, predict_label, labels, filenames = sess.run(
+            [top_k_op, kwargs['logits'], kwargs['predictions'], kwargs['labels'], kwargs['filenames']])
+          print('filename\tpredict_label\t real label')
+          f.write('filename,\tpredict_label,\treal label,\tprobabilities\n')
+          # print(logits)
+          # print('>>>>>>>>> predictions >>>>>>>>')
+          # print(predict_label.astype(int))
+          predict_label = predict_label.astype(int)
+          np.savetxt(result_file, predict_label, delimiter=",",fmt='%d')
+          # print('>>>>>>>>> probabilities >>>>>>>>')
+          probabilities = np.exp(logits)/np.exp(logits).sum(axis=1, keepdims=True)
+          # print(probabilities)
+          # np.savetext(probabilities, delimiter=",")
+
+          for i in range(len(labels)):
+            print('{}, {}, {}'.format(filenames[i].split('/')[-1],predict_label[i],labels[i]))
+            f.write('{},{},{},{}\n'.format(filenames[i].split('/')[-1], predict_label[i], labels[i], probabilities[i]))
+          
+          true_count += np.sum(predictions)
+          step += 1
 
       # Compute precision @ 1.
       precision = true_count / total_sample_count
@@ -123,7 +142,7 @@ def evaluate():
   with tf.Graph().as_default() as g:
     # Get images and labels for CIFAR-10.
     eval_data = FLAGS.eval_data == 'test'
-    images, labels = cifar10.inputs(eval_data=eval_data)
+    images, labels, filenames = cifar10.inputs(eval_data=eval_data)
 
     # Build a Graph that computes the logits predictions from the
     # inference model.
@@ -131,6 +150,8 @@ def evaluate():
 
     # Calculate predictions.
     top_k_op = tf.nn.in_top_k(logits, labels, 1)
+
+    predictions=tf.cast(tf.argmax(logits,1), tf.int32)
 
     # Restore the moving average version of the learned variables for eval.
     variable_averages = tf.train.ExponentialMovingAverage(
@@ -143,8 +164,15 @@ def evaluate():
 
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
+    other_variable = {
+      'predictions': predictions,
+      'logits': logits,
+      'labels': labels,
+      'filenames': filenames
+    }
+
     while True:
-      eval_once(saver, summary_writer, top_k_op, summary_op)
+      eval_once(saver, summary_writer, top_k_op, summary_op, other_variable)
       if FLAGS.run_once:
         break
       time.sleep(FLAGS.eval_interval_secs)

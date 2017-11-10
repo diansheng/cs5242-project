@@ -8,7 +8,8 @@ python cifar10_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
 	--num_class 2 \
 	--initial_learn_rate 0.1 \
-	--max_steps 1000
+	--max_steps 1000 \
+	--use_fp16 True
 
 
 # to run locally without training data restructure
@@ -17,21 +18,28 @@ python cifar10_train.py \
 	--num_class 132 \
 	--initial_learn_rate 0.1 
 
-# to run in server
 python cifar10_multi_gpu_train.py \
-	--data_dir ~/data/train_partial \
-	--num_class 6 \
+	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
+	--num_class 2 \
 	--initial_learn_rate 0.1 \
-	--batch_size 30 \
-	--max_steps 10000
-
+	--num_gpus 2
 
 # evaluate
 python cifar10_eval.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
-	--eval_data teset \
-	--num_examples 200 
+	--eval_data test \
+	--num_examples 557 \
+	--eval_interval_secs 10
 
+####################################################
+
+# to run in server
+python cifar10_multi_gpu_train.py \
+	--data_dir ~/data/train_partial \
+	--num_class 2 \
+	--initial_learn_rate 0.1 \
+	--batch_size 30 \
+	--max_steps 10000 
 
 # full class in gcloud
 python cifar10_train.py --data_dir ~/data/transferred_train --num_class 132 --initial_learn_rate 0.1 --batch_size 50 
@@ -43,6 +51,22 @@ nohup python cifar10_train.py \
 	--batch_size 50 \
 	--max_steps 10000 \
 	> nohup.log &
+
+python cifar10_multi_gpu_train.py \
+	--data_dir ~/data/transferred_train \
+	--num_class 132 \
+	--initial_learn_rate 0.1 \
+	--batch_size 50 \
+	--max_steps 10000 \
+	--num_gpus 2
+
+
+python cifar10_eval.py \
+	--data_dir ~/data/transferred_train \
+	--eval_data test \
+	--num_examples 48870 \
+	--eval_interval_secs 60
+
 
 nohup python cifar10_train.py --data_dir ~/data/transferred_train --num_class 132 --initial_learn_rate 0.1 --batch_size 50 > nohup.log &
 
