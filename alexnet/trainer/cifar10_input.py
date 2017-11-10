@@ -36,7 +36,7 @@ IMAGE_SIZE = 98  # origin: 24
 
 # Global constants describing the CIFAR-10 data set.
 # NUM_CLASSES = 2 # origin: 10
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 5000 # origin: 50000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 557 # origin: 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 
@@ -313,6 +313,32 @@ def get_image_input2(data_dir):
   print('<<<< get image input end <<<<')
 
 
+def get_test_image_input(data_dir):
+  from cifar10 import FLAGS
+  extensions = ['jpg', 'jpeg', 'JPG', 'JPEG']
+  file_list = []
+  for extension in extensions:
+      file_glob = os.path.join(data_dir, '*.' + extension)
+      file_list.extend(gfile.Glob(file_glob))
+  if not file_list:
+      tf.logging.warning('No files found')
+
+  file_full_path_list = [os.path.join(data_dir, x) for x in file_list][:FLAGS.num_examples]
+  for f in file_full_path_list:
+      if not tf.gfile.Exists(f):
+          raise ValueError('Failed to find file: ' + f)
+  labels = [0] * len(file_full_path_list)
+
+  print('--------- num of samples ---------')
+  print(len(labels))
+  # Create a queue that produces the filenames to read.
+  file_input_queue = tf.train.slice_input_producer(
+                                  [file_full_path_list, labels],
+                                  shuffle=False)
+  read_input = read_image(file_input_queue)
+  read_input.filename = file_input_queue[0]
+  return read_input
+
 def distorted_inputs(data_dir, batch_size):
     """Construct distorted input for CIFAR training using the Reader ops.
 
@@ -387,15 +413,12 @@ def inputs(eval_data, data_dir, batch_size):
       images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
       labels: Labels. 1D tensor of [batch_size] size.
     """
-    if not eval_data:
-      # filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i)
-      #                for i in xrange(1, 6)]
-      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
-    else:
-      # filenames = [os.path.join(data_dir, 'test_batch.bin')]
+    if eval_data:
       num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
-
-    read_input = get_image_input2(data_dir)
+      read_input = get_image_input2(data_dir)
+    else:
+      num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+      read_input = get_test_image_input(data_dir)
 
     # Read examples from files in the filename queue.
     # read_input = read_cifar10(filename_queue)

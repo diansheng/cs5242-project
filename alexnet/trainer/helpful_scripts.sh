@@ -8,6 +8,7 @@ python cifar10_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
 	--num_class 2 \
 	--initial_learn_rate 0.1 \
+	--batch_size 32 \
 	--max_steps 1000 \
 	--use_fp16 True
 
@@ -20,13 +21,20 @@ python cifar10_train.py \
 
 python cifar10_multi_gpu_train.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
-	--num_class 2 \
+	--num_class 132 \
 	--initial_learn_rate 0.1 \
 	--num_gpus 2
 
 # evaluate
 python cifar10_eval.py \
 	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_train \
+	--eval_data train_eval \
+	--num_examples 557 \
+	--eval_interval_secs 10
+
+# predict
+python cifar10_eval.py \
+	--data_dir ~/Codebox/tensorflow_env/cs5242/data/transferred_test \
 	--eval_data test \
 	--num_examples 557 \
 	--eval_interval_secs 10
@@ -58,7 +66,7 @@ python cifar10_multi_gpu_train.py \
 	--initial_learn_rate 0.1 \
 	--batch_size 50 \
 	--max_steps 10000 \
-	--num_gpus 2
+	--num_gpus 2 
 
 
 python cifar10_eval.py \

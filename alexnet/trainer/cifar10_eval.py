@@ -141,7 +141,7 @@ def evaluate():
   """Eval CIFAR-10 for a number of steps."""
   with tf.Graph().as_default() as g:
     # Get images and labels for CIFAR-10.
-    eval_data = FLAGS.eval_data == 'test'
+    eval_data = FLAGS.eval_data == 'train_eval'
     images, labels, filenames = cifar10.inputs(eval_data=eval_data)
 
     # Build a Graph that computes the logits predictions from the
@@ -151,6 +151,7 @@ def evaluate():
     # Calculate predictions.
     top_k_op = tf.nn.in_top_k(logits, labels, 1)
 
+    # predict labels 
     predictions=tf.cast(tf.argmax(logits,1), tf.int32)
 
     # Restore the moving average version of the learned variables for eval.
